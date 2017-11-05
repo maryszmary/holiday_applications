@@ -5,6 +5,9 @@
 </head>
 <body>
 <h1>Welcome to the holiday application service!</h1>
+{% if error_message: %}
+<p style="{background-color: pink}">{{error_message}}</p>
+{% endif %}
 <form action="./login" method="post">
 	<h2>Please, log in!</h2>
 	<fieldset>

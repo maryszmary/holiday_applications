@@ -69,9 +69,21 @@ def logout():
 @app.route('/register', methods=['GET', 'POST'])
 def register():
     if request.method == 'POST':
+        if request.form['password'] != request.form['sec_password']:
+            error = "The passwords you've entered don't match, try again!"
+            return render_template('log_in.html', error_message=error)
         username = request.form['username']
+        if DB.userExists(username):
+            error = "A user with this name already exists."
+            return render_template('log_in.html', error_message=error)
         password = request.form['password']
-        name = request.form['name'] + ' ' + request.form['name']
+        name = request.form['name'] + ' ' + request.form['surname']
+        department = request.form['department']
+        if username and password and name and department:
+            DB.add_user(username, password, name, department)
+            user = User(username)
+            login_user(user)
+    return redirect(url_for('index'))
 
 
 @login_manager.user_loader
@@ -85,7 +97,24 @@ def home():
     if request.method == 'POST':
         if request.form['submit'] == 'Apply for holiday!':
             pass
-    return render_template('home.html', name=current_user.name)
+    return render_template('home.html',
+        name=current_user.name, status = current_user.status)
+
+
+@app.route('/stats', methods=['GET', 'POST'])
+@login_required
+def stats():
+    if request.method == 'POST':
+        employee = request.form['employee']
+        user = DB.userExists(employee)
+        if user:
+            data = DB.get_stats(user)
+            return render_template('stats.html',
+                employee = employee, found=True, data = data)
+        else:
+            return render_template('stats.html',
+                employee = employee, found = False)
+    return render_template('stats.html')
 
 
 if __name__ == '__main__':
