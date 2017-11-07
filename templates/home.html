@@ -2,14 +2,111 @@
 <html>
 <head>
 	<title>Holiday Applications</title>
+	<script type="text/javascript" src="{{ url_for('static', filename='jquery.min.js') }}"></script>
 </head>
+<style type="text/css">
+.thead {
+	background-color: #79b2f1;
+}
+.id {
+	background-color: #79b2f1;
+	padding: 10px;
+}
+.start {
+	background-color: #2277e3;
+	color: white;
+	padding: 10px;
+}
+.end {
+	background-color: #5118e4;
+	color: white;
+	padding: 10px;
+}
+.pending {
+	background-color: #a675ee;
+	padding: 10px;
+}
+.approved {
+	background-color: #44e298;
+	padding: 10px;
+}
+.revert {
+	background-color: #79b2f1;
+	padding: 10px;
+}
+</style>
 <body>
 <h1>Holiday application service</h1>
-{% if status == "admin": %}
+{% if current_user.status == "admin": %}
 <p><a href="./stats">See stats</a>.</p>
 {% endif %}
-Hi, {{ name }}! You are logged in! <a href="./logout">Log out</a>
+Hi, {{ current_user.name }}! This is your home page! <a href="./logout">Log out</a>
+{% if applications %}
+<p>Your active applications:</p>
+<table>
+	<tr class="thead">
+		<th>id</th>
+		<th>start</th>
+		<th>end</th>
+		<th>status</th>
+		<th></th>
+	</tr>
+	{% for app in applications %}
+	<tr>
+		<td class="id">{{app['ID']}}</td>
+		<td class="start">{{app['start_date']}}</td>
+		<td class="end">{{app['end_date']}}</td>
+		<td class="{{app['status']}}">{{app['status']}}</td>
+		<td class="revert">
+			<button id="{{app['ID']}}" onclick="sendRequest(this)">revert</button>
+		</td>
+	</tr>
+	{% endfor %}
+</table>
+<script type="text/javascript">
+function sendRequest(el){
+	$.ajax({
+	type: "POST",
+	url: '/revert',
+	data: {
+		"revert": true,
+		"app_id": el.id
+	},
+	dataType: "json",
+	success: onRemoval
+});
+}
+
+function onRemoval(data) {
+	console.log('Load was performed.');
+	if (data.success){
+		alert("Successfully removed the application!");
+	} else {
+		alert("Could not remove the application.")
+	}
+	location.reload();
+}
+</script>
+<p>Want to create another one?</p>
+{% elif create: %}
+{% else: %}
 <p>You have no active applications. Want to create one?</p>
-<input type="submit" name="submit" value="Apply for holiday!">
+{% endif %}
+{% if create: %}
+<form method="POST">
+	<fieldset>
+		<legend>Holiday application</legend>
+		Start date:<br/>
+		<input type="date" name="start_date"><br/>
+		End date:<br/>
+		<input type="date" name="end_date"><br/>
+		<input type="submit" name="submit" value="Send">
+	</fieldset>
+</form>
+{% else %}
+<form method="POST">
+	<input type="submit" name="submit" value="Apply for holday!">
+</form>
+{% endif %}
 </body>
 </html>

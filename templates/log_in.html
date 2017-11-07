@@ -3,13 +3,20 @@
 <head>
 	<title>Holiday Applications</title>
 </head>
+<style>
+.alert {
+    padding: 20px;
+    background-color: #ff9800;
+    color: white;
+}
+</style>
 <body>
 <h1>Welcome to the holiday application service!</h1>
-{% if error_message: %}
-<p style="{background-color: pink}">{{error_message}}</p>
-{% endif %}
 <form action="./login" method="post">
 	<h2>Please, log in!</h2>
+	{% if login_error %}
+	<div class="alert">{{login_error}}</div>
+	{% endif %}
 	<fieldset>
 		<legend>Log in</legend>
 		Username<br/>
@@ -21,6 +28,9 @@
 </form>
 <form action="./register" method="post">
 	<h2>Have no account yet? Register!</h2>
+	{% if error_message: %}
+	<div class="alert">{{error_message}}</div>
+	{% endif %}
 	<fieldset>
 		<legend>Register</legend>		
 		First name<br/>

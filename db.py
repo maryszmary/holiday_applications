@@ -22,8 +22,10 @@ class HolidayDB():
         db = sqlite3.connect(self.name)
         cur = db.cursor()
         creation = [
-        'CREATE TABLE users (ID integer, date, username, password, status, name, department, days_free integer);',
-        'CREATE TABLE applications (ID integer, user_id, date, holiday_start, holiday_duration);',
+        'CREATE TABLE users (ID integer, date, username, password, status, '
+        'name, department, days_free integer);',
+        'CREATE TABLE applications (ID integer, username, date, '
+        'start_date date, end_date date, status);',
         ]
         for line in creation:
             cur.execute(line)
@@ -39,33 +41,59 @@ class HolidayDB():
         maxid = cur.fetchone()[0]
         usid = maxid + 1 if maxid is not None else 0
         date = time.strftime('%Y.%m.%d.%H.%m')
-        cur.execute('INSERT INTO users VALUES (?, ?, ?, ?, ?, ?, ?)',
-            (usid, username, password, date, "user", name, department, 28))
+        cur.execute(
+            'INSERT INTO users VALUES (?, ?, ?, ?, ?, ?, ?)',
+            (usid, username, password, date, "user", name, department, 28)
+            )
         db.commit()
         db.close()
 
-    def add_application(self, username, holiday_start, holiday_duration):
+    def add_application(self, username, start_date, end_date):
         db = sqlite3.connect(self.name)
         cur = db.cursor()
-        date = time.strftime('%Y.%m.%d.%H.%m')
+        date = time.strftime('%Y-%m-%d.%H:%m')
+        cur.execute('SELECT MAX(ID) FROM applications')
+        maxid = cur.fetchone()[0]
+        new_id = maxid + 1 if maxid is not None else 0
+        cur.execute(
+            'INSERT INTO applications VALUES (?, ?, ?, ?, ?, ?)',
+            (new_id, username, date, start_date, end_date, 'pending')
+            )
         db.commit()
         db.close()
 
+    def remove_application(self, app_id):
+        db = sqlite3.connect(self.name)
+        cur = db.cursor()
+        cur.execute('SELECT start_date FROM applications WHERE ID = ?', (app_id,))
+        start_date = cur.fetchone()[0]
+        y, m, d = self.parse_date(start_date)
+        tm = time.localtime()
+        if y == tm.tm_year and m == tm.tm_mon and d > tm.tm_mday + 3:
+            cur.execute('DELETE FROM applications WHERE ID = ?', (app_id,))
+            sucsess = True
+        else:
+            sucsess = False
+        db.commit()
+        db.close()
+        return sucsess
 
     def passwordCorrect(self, username, password):
         db = sqlite3.connect(self.name)
         cur = db.cursor()
-        cur.execute('SELECT password FROM users WHERE username = ?',
-                    (username, ))
-        stored_password = cur.fetchall()[0][0]
+        cur.execute(
+            'SELECT password FROM users WHERE username = ?', (username, ))
+        stored_password = cur.fetchone()[0]
         db.close()
         return stored_password == password
 
     def get_user_data(self, username):
         db = sqlite3.connect(self.name)
         cur = db.cursor()
-        cur.execute('SELECT name, department, status FROM users '
-            'WHERE username = ?', (username, ))
+        cur.execute(
+            'SELECT name, department, status FROM users WHERE username = ?',
+            (username, )
+            )
         user_data = cur.fetchall()[0]
         db.commit()
         db.close()
@@ -85,6 +113,27 @@ class HolidayDB():
         db.close()
         return username
 
+    def active_apps(self, username):
+        db = sqlite3.connect(self.name)
+        cur = db.cursor()
+        tm = time.localtime()
+        cur.execute(
+            'SELECT ID, start_date, end_date, status FROM applications WHERE username = ?',
+            (username, )
+            )
+        apps = cur.fetchall()
+        for i, line in enumerate(apps):
+            y, m, d = self.parse_date(line[1])
+            if y >= tm.tm_year and m >= tm.tm_mon and d >= tm.tm_mday:
+                apps[i] = {
+                'ID': line[0],
+                'start_date': line[1],
+                'end_date': line[2],
+                'status': line[3]
+                }
+        db.close()
+        return apps
+
     def get_stats(self, username):
         db = sqlite3.connect(self.name)
         cur = db.cursor()
@@ -96,3 +145,7 @@ class HolidayDB():
         db.commit()
         db.close()
         return data
+
+    def parse_date(self, date):
+        start_date = [int(el) for el in date.split('-')]
+        return tuple(start_date)

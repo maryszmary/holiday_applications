@@ -9,6 +9,7 @@ from flask import render_template
 from flask import request
 from flask import redirect
 from flask import url_for
+from flask import jsonify
 from flask.ext.login import LoginManager
 from flask.ext.login import UserMixin
 from flask.ext.login import current_user
@@ -35,7 +36,7 @@ class User(UserMixin):
         self.name = name
         self.department = department
         self.status = status
-    
+
     def __repr__():
         return self.id
 
@@ -55,6 +56,9 @@ def login():
         if DB.passwordCorrect(username, password):
             user = User(username)
             login_user(user)
+        else:
+            error = "Either login or password is wrong, try again!"
+            return render_template("log_in.html", login_error=error)
         return redirect(url_for('home'))
     return redirect(url_for('index'))
 
@@ -74,7 +78,7 @@ def register():
             return render_template('log_in.html', error_message=error)
         username = request.form['username']
         if DB.userExists(username):
-            error = "A user with this name already exists."
+            error = "A user with this name already exists. Please choose another name."
             return render_template('log_in.html', error_message=error)
         password = request.form['password']
         name = request.form['name'] + ' ' + request.form['surname']
@@ -94,11 +98,28 @@ def load_user(userid):
 @app.route('/home', methods=['GET', 'POST'])
 @login_required
 def home():
+    applications = DB.active_apps(current_user.id)
     if request.method == 'POST':
-        if request.form['submit'] == 'Apply for holiday!':
-            pass
-    return render_template('home.html',
-        name=current_user.name, status = current_user.status)
+        if request.form['submit'] == 'Apply for holday!':
+            return render_template('home.html',
+                current_user=current_user, create=True)
+        if request.form['submit'] == 'Send':
+            start_date = request.form['start_date']
+            end_date = request.form['end_date']
+            DB.add_application(current_user.id, start_date, end_date)
+            return redirect(url_for('home'))
+    return render_template('home.html', current_user=current_user,
+        applications=applications)
+
+
+@app.route('/revert', methods=['GET', 'POST'])
+@login_required
+def revert_app():
+    if request.method == 'POST':
+        app_id = request.form['app_id']
+        success = DB.remove_application(app_id)
+    print('success: ' + str(success))
+    return jsonify({'success': success})
 
 
 @app.route('/stats', methods=['GET', 'POST'])
