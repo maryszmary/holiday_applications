@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Holiday Applications</title>
+</head>
+<body>
+<h1>Statistics for the holiday applications</h1>
+<form method="POST">
+	<legend>Select an employee (name + surname or username):</legend>
+	<input type="text" name="employee">
+	<input type="submit" name="Apply for holday!">
+</form>
+{% if employee and not found: %}
+<p>We couldn't find the user {{ employee }}.</p> 
+{% elif employee and found : %}
+<p>Stats for the user {{ employee }}: </p>
+{{data}}
+{% endif %}
+</body>
+</html>
