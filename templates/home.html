@@ -34,13 +34,19 @@
 	background-color: #79b2f1;
 	padding: 10px;
 }
+.alert {
+    padding: 20px;
+    background-color: #ff9800;
+    color: white;
+}
 </style>
 <body>
 <h1>Holiday application service</h1>
 {% if current_user.status == "admin": %}
 <p><a href="./stats">See stats</a>.</p>
 {% endif %}
-Hi, {{ current_user.name }}! This is your home page! <a href="./logout">Log out</a>
+Hi, {{ current_user.name }}! This is your home page! <a href="./logout">Log out</a><br/>
+You have <b>{{ current_user.days_free }} days</b> free for holiday this year.
 {% if applications %}
 <p>Your active applications:</p>
 <table>
@@ -94,6 +100,9 @@ function onRemoval(data) {
 {% endif %}
 {% if create: %}
 <form method="POST">
+{% if error %}
+<div class="alert">{{error}}</div>
+{% endif %}
 	<fieldset>
 		<legend>Holiday application</legend>
 		Start date:<br/>

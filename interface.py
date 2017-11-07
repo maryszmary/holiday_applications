@@ -32,10 +32,11 @@ class User(UserMixin):
         self.get_user_data()
 
     def get_user_data(self):
-        name, department, status = DB.get_user_data(self.id)
+        name, department, status, days_free = DB.get_user_data(self.id)
         self.name = name
         self.department = department
         self.status = status
+        self.days_free = days_free
 
     def __repr__():
         return self.id
@@ -106,8 +107,13 @@ def home():
         if request.form['submit'] == 'Send':
             start_date = request.form['start_date']
             end_date = request.form['end_date']
-            DB.add_application(current_user.id, start_date, end_date)
-            return redirect(url_for('home'))
+            success = DB.add_application(current_user.id, start_date, end_date)
+            if success:
+                return redirect(url_for('home'))
+            else:
+                error = 'It seems that you don\'t have enough free days!'
+                return render_template('home.html', current_user = current_user,
+                    create=True, error=error)
     return render_template('home.html', current_user=current_user,
         applications=applications)
 
@@ -118,7 +124,6 @@ def revert_app():
     if request.method == 'POST':
         app_id = request.form['app_id']
         success = DB.remove_application(app_id)
-    print('success: ' + str(success))
     return jsonify({'success': success})
 
 

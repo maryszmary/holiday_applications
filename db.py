@@ -5,6 +5,7 @@ This is the database module. It contains DB class.
 import os
 import sqlite3
 import time
+from datetime import datetime
 
 
 class HolidayDB():
@@ -51,16 +52,32 @@ class HolidayDB():
     def add_application(self, username, start_date, end_date):
         db = sqlite3.connect(self.name)
         cur = db.cursor()
-        date = time.strftime('%Y-%m-%d.%H:%m')
-        cur.execute('SELECT MAX(ID) FROM applications')
-        maxid = cur.fetchone()[0]
-        new_id = maxid + 1 if maxid is not None else 0
-        cur.execute(
-            'INSERT INTO applications VALUES (?, ?, ?, ?, ?, ?)',
-            (new_id, username, date, start_date, end_date, 'pending')
-            )
+        if self.enough_days(cur, username, start_date, end_date):
+            sucsess = True
+            date = time.strftime('%Y-%m-%d.%H:%m')
+            cur.execute('SELECT MAX(ID) FROM applications')
+            maxid = cur.fetchone()[0]
+            new_id = maxid + 1 if maxid is not None else 0
+            cur.execute(
+                'INSERT INTO applications VALUES (?, ?, ?, ?, ?, ?)',
+                (new_id, username, date, start_date, end_date, 'pending')
+                )
+        else:
+            sucsess = False
         db.commit()
         db.close()
+        return sucsess
+
+    def enough_days(self, cur, username, start_date, end_date):
+        """
+        Chacks if there're enough free days for the holliday applied for.
+        """
+        cur.execute('SELECT days_free FROM users WHERE username = ?', (username,))
+        days_free = cur.fetchone()[0]
+        d1 = datetime.strptime(start_date, "%Y-%m-%d")
+        d2 = datetime.strptime(end_date, "%Y-%m-%d")
+        days_between = abs((d2 - d1).days)
+        return days_free >= days_between
 
     def remove_application(self, app_id):
         db = sqlite3.connect(self.name)
@@ -91,7 +108,7 @@ class HolidayDB():
         db = sqlite3.connect(self.name)
         cur = db.cursor()
         cur.execute(
-            'SELECT name, department, status FROM users WHERE username = ?',
+            'SELECT name, department, status, days_free FROM users WHERE username = ?',
             (username, )
             )
         user_data = cur.fetchall()[0]
