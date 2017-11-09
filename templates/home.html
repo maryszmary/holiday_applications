@@ -1,52 +1,17 @@
 <!DOCTYPE html>
 <html>
 <head>
-	<title>Holiday Applications</title>
+	<title>Vacation Applications</title>
 	<script type="text/javascript" src="{{ url_for('static', filename='jquery.min.js') }}"></script>
+	<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='style.css') }}"/>
 </head>
-<style type="text/css">
-.thead {
-	background-color: #79b2f1;
-}
-.id {
-	background-color: #79b2f1;
-	padding: 10px;
-}
-.start {
-	background-color: #2277e3;
-	color: white;
-	padding: 10px;
-}
-.end {
-	background-color: #5118e4;
-	color: white;
-	padding: 10px;
-}
-.pending {
-	background-color: #a675ee;
-	padding: 10px;
-}
-.approved {
-	background-color: #44e298;
-	padding: 10px;
-}
-.revert {
-	background-color: #79b2f1;
-	padding: 10px;
-}
-.alert {
-    padding: 20px;
-    background-color: #ff9800;
-    color: white;
-}
-</style>
 <body>
-<h1>Holiday application service</h1>
+<h1>Vacation application service</h1>
 {% if current_user.status == "admin": %}
 <p><a href="./stats">See stats</a>.</p>
 {% endif %}
 Hi, {{ current_user.name }}! This is your home page! <a href="./logout">Log out</a><br/>
-You have <b>{{ current_user.days_free }} days</b> free for holiday this year.
+You have <b>{{ current_user.days_free }} days</b> free for vacation this year.
 {% if applications %}
 <p>Your active applications:</p>
 <table>
@@ -114,7 +79,7 @@ function onRemoval(data) {
 </form>
 {% else %}
 <form method="POST">
-	<input type="submit" name="submit" value="Apply for holday!">
+	<input type="submit" name="submit" value="Apply for vacation!">
 </form>
 {% endif %}
 </body>

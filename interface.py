@@ -1,7 +1,7 @@
 """
 This is а Flask server for my test task in profi.ru.
-The interface allows to send the applications for holidays for users
-and to see the holidat stats for administers.
+The interface allows to send the applications for vacation for users
+and to see the vacation stats for administers.
 """
 
 from flask import Flask
@@ -16,10 +16,10 @@ from flask.ext.login import current_user
 from flask.ext.login import login_user
 from flask.ext.login import login_required
 from flask.ext.login import logout_user
-from db import HolidayDB
+from db import VacationDB
 
 
-DBNAME = 'holiday.db'
+DBNAME = 'vacation.db'
 app = Flask(__name__, static_folder='./static')
 login_manager = LoginManager()
 login_manager.init_app(app)
@@ -101,7 +101,7 @@ def load_user(userid):
 def home():
     applications = DB.active_apps(current_user.id)
     if request.method == 'POST':
-        if request.form['submit'] == 'Apply for holday!':
+        if request.form['submit'] == 'Apply for vacation!':
             return render_template('home.html',
                 current_user=current_user, create=True)
         if request.form['submit'] == 'Send':
@@ -130,20 +130,33 @@ def revert_app():
 @app.route('/stats', methods=['GET', 'POST'])
 @login_required
 def stats():
+    month_data = DB.get_month_data()
     if request.method == 'POST':
         employee = request.form['employee']
-        user = DB.userExists(employee)
-        if user:
-            data = DB.get_stats(user)
-            return render_template('stats.html',
-                employee = employee, found=True, data = data)
+        username = DB.userExists(employee)
+        if username:
+            user_data = DB.get_personal_data(username)
+            days_by_year = DB.days_by_year(username)
+            print(days_by_year)
+            return render_template(
+                'stats.html',
+                employee=employee,
+                found=True,
+                user_data=user_data,
+                month_data=month_data,
+                days_by_year=days_by_year
+                )
         else:
-            return render_template('stats.html',
-                employee = employee, found = False)
-    return render_template('stats.html')
+            return render_template(
+                'stats.html',
+                employee=employee,
+                found=False,
+                month_data=month_data
+                )
+    return render_template('stats.html', month_data=month_data)
 
 
 if __name__ == '__main__':
-    DB = HolidayDB(DBNAME)
+    DB = VacationDB(DBNAME)
     app.secret_key = '0jhsijnj=c1el[80ez5.h=82'
     app.run(debug = True, port = 5555)

@@ -1,17 +1,11 @@
 <!DOCTYPE html>
 <html>
 <head>
-	<title>Holiday Applications</title>
+	<title>Vacation Applications</title>
+	<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='style.css') }}"/>
 </head>
-<style>
-.alert {
-    padding: 20px;
-    background-color: #ff9800;
-    color: white;
-}
-</style>
 <body>
-<h1>Welcome to the holiday application service!</h1>
+<h1>Welcome to the vacation application service!</h1>
 <form action="./login" method="post">
 	<h2>Please, log in!</h2>
 	{% if login_error %}

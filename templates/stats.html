@@ -1,10 +1,28 @@
 <!DOCTYPE html>
 <html>
 <head>
-	<title>Holiday Applications</title>
+	<title>Vacation Applications</title>
+	<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='style.css') }}"/>
 </head>
 <body>
-<h1>Statistics for the holiday applications</h1>
+<h1>Statistics for the vacation applications</h1>
+<h2>Mounthly statistics</h2>
+<table>
+	<caption>days of vacation per each month</caption>
+	<tr>
+		<th class="thead">month</th>
+		{% for line in month_data %}
+			<td class="start">{{line[0]}}</td>
+		{% endfor %}
+	</tr>
+	<tr>
+		<th  class="thead">number of days</th>
+		{% for line in month_data %}
+			<td class="{{line[2]}}">{{line[1]}}</td>
+		{% endfor %}
+	</tr>
+</table>
+<h2>Personal data</h2>
 <form method="POST">
 	<legend>Select an employee (name + surname or username):</legend>
 	<input type="text" name="employee">
@@ -14,7 +32,38 @@
 <p>We couldn't find the user {{ employee }}.</p> 
 {% elif employee and found : %}
 <p>Stats for the user {{ employee }}: </p>
-{{data}}
+<table>
+	<caption>User data</caption>
+	<tr>
+		<th>name: </th>
+		<td>{{user_data[0]}}</td>
+	</tr>
+	<tr>
+		<th>username: </th>
+		<td>{{user_data[1]}}</td>
+	</tr>
+	<tr>
+		<th>deparment: </th>
+		<td>{{user_data[2]}}</td>
+	</tr>
+</table>
+<br>
+<table>
+	<tr class="thead">
+		<th>year</th>
+		<th>days of vacation</td>		
+	</tr>
+	<tr>
+		{% for line in days_by_year %}
+		<td class="start">
+			{{line}}	
+		</td>
+		<td class="end">
+			{{days_by_year[line]}}
+		</td>
+		{% endfor %}		
+	</tr>
+</table>
 {% endif %}
 </body>
 </html>
