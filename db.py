@@ -177,7 +177,7 @@ class VacationDB():
     def transform_monthly_data(self, app_dicts):
         apps = sorted(app_dicts.items(), key=lambda x: x[0])
         max_days = max(apps, key=lambda x: x[1])
-        min_days = min(apps, key=lambda x: x[0])
+        min_days = min(apps, key=lambda x: x[1])
         for i, line in enumerate(apps):
             if line[1] == max_days[1]:
                 css_class = 'end'

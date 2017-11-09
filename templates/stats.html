@@ -53,16 +53,16 @@
 		<th>year</th>
 		<th>days of vacation</td>		
 	</tr>
+	{% for line in days_by_year %}
 	<tr>
-		{% for line in days_by_year %}
 		<td class="start">
 			{{line}}	
 		</td>
 		<td class="end">
 			{{days_by_year[line]}}
 		</td>
-		{% endfor %}		
 	</tr>
+	{% endfor %}		
 </table>
 {% endif %}
 </body>
