@@ -1,4 +1,4 @@
-# Holiday application service
+# Vacation application service
 
 
 ## About
@@ -40,3 +40,8 @@
 ## Demo
 
 [Здесь](http://maryszmary.pythonanywhere.com/).
+
+В базе данной демо-версии существуют такие пользователи:
+* username: administer, пароль 111; может просматривать статистику
+* username: alexham, пароль: nonstop
+* username: maryszmary, пароль: aaa
