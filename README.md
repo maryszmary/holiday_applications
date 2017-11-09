@@ -46,7 +46,7 @@
 
 Если пользователь запросил больше дней, чем у него есть, он видит предупреждение, и заявку оставить не получается.
 
-![another worning](/images/warning.jpg)
+![another worning](/images/another_warning.jpg)
 
 ### Отмена заявки
 
